@@ -1078,7 +1078,7 @@ For $b = 0,1$ define experiments $\operatorname{EXP}(0)$ and $\operatorname{EXP}
 \begin{figure}[H]
     \centering
     \begin{tikzpicture}
-        \draw (0, 0) rectangle (8, 2);
+        \draw (0, 0) rectangle (10, 2);
 
         % Input arrow
         \draw[->] (1.2, 2.5) -- (1.2, 1.8);
@@ -1090,18 +1090,348 @@ For $b = 0,1$ define experiments $\operatorname{EXP}(0)$ and $\operatorname{EXP}
         \node at (1.2, 0.75) {$k \leftarrow \mathcal{K}$};
 
         % Output arrow
-        \draw[->] (6.8, 0.2) -- (6.8, -0.5);
-        \node[anchor=west] at (6.9, -0.3) {$b^\prime \in \{0, 1\}$};
+        \draw[->] (8.8, 0.2) -- (8.8, -0.5);
+        \node[anchor=west] at (8.9, -0.3) {$b^\prime \in \{0, 1\}$};
 
         % Right box
-        \draw (5.8, 0.2) rectangle (7.8, 1.8);
-        \node at (6.8, 1.25) {Adversary};
-        \node at (6.8, 0.75) {$A$};
+        \draw (7.8, 0.2) rectangle (9.8, 1.8);
+        \node at (8.8, 1.25) {Adversary};
+        \node at (8.8, 0.75) {$A$};
 
+        \node[anchor=south] at (5.0, 1.25) {$m_0, m_1 \in \mathcal{M} \colon \abs{m_0} =
+                                             \abs{m_1}$};
+        \draw [<-] (3.0, 1.15) -- (7.8, 1.15);
+        \draw [->] (2.2, 0.85) -- (7.0, 0.85);
+        \node[anchor=north] at (5.0, 0.75) {$c \leftarrow E(k, m_b)$};
+    \end{tikzpicture}
+    \caption{diagram of experiment to prove semantic security}
+    \label{fig:semantic_security_diagram}
+\end{figure}
+
+The experiments consist of a challenger and an adversary. The challenger picks a random key $k$,
+and the adversary will give out two messages of equal length $m_0$ and $m_1$. The challenger will
+then output the encryption of $m_b$ depending on the input to the experiment, and the adversary
+will attempt to guess the value of $b$ and output this guess $b^\prime$.
+
+We define the event $W_b$ to be the event that in experiment $b$, the adversary output 1:
+$$ \text{For } b = 0, 1 \colon W_b \coloneqq [\text{event that } \operatorname{EXP}(b) = 1] $$
+
+\begin{definition}[Semantic security advantage]
+    The semantic security advantage of the adversary $A$ against the encryption scheme $E$ is
+        $$ \operatorname{Adv}_{SS}[A, E] \coloneqq \abs{\operatorname{Pr}[W_0] -
+           \operatorname{Pr}[W_1]} \in [0, 1] $$
+\end{definition}
+
+In other words, the question is whether the adversary behaves differently when given the encryption
+of $m_0$ to when given the encryption of $m_1$. In experiment 0 the adversary is given the
+encryption of $m_0$ and in experiment 1 they were given the encryption of $m_1$. We are simply
+interested in whether the adversary output 1 or not. If in both experiments the adversary output 1
+with the same probability, then the adversary could not distinguish the two experiments (and so the
+semantic security advantage would be 0).
+
+\begin{definition}[Semantic security]
+    $\mathbb{E}$ is semantically secure if for all ``efficient" adversaries $A$
+        $$ \operatorname{Adv}_{SS}[A, \mathbb{E}] \text{ is ``negligible"} $$
+    which implies that for all explicit $m_0, m_1 \in \mathcal{M}$:
+        $$ \{E(k, m_0)\} \approx_P \{E(k, m_1)\} $$
+    \label{def:semantic_security}
+\end{definition}
+
+\subsubsection*{Example}
+
+Suppose an ``efficient" adversary $A$ can always deduce the LSB of the plaintext from a ciphertext.
+We can show using Definition~\ref{def:semantic_security} that $\mathbb{E} = (E, D)$ is not
+semantically secure. This will then imply that a semantically secure system would disallow attacks
+of this type.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \draw (0, 0) rectangle (11, 3);
+
+        % Input arrow
+        \draw[->] (1.2, 3.5) -- (1.2, 1.8);
+        \node[anchor=west] at (1.3, 3.3) {$b \in \{0, 1\}$};
+
+        % Left box
+        \draw (0.2, 0.2) rectangle (2.2, 1.8);
+        \node at (1.2, 1.25) {Challenger};
+        \node at (1.2, 0.75) {$k \leftarrow \mathcal{K}$};
+
+        % Output arrow
+        \draw[->] (9.6, 0.4) -- (9.6, -1);
+        \node[anchor=west] at (9.7, -0.3) {$b^\prime \in \{0, 1\}$};
+
+        % Larger right box
+        \draw (7.8, 0.2) rectangle (10.8, 2.8);
+        \node at (9.3, 2.4) {Adversary $B$};
+
+        % Smaller right box
+        \draw (8.6, 0.4) rectangle (10.6, 2.0);
+        \node at (9.6, 1.45) {Adversary};
+        \node at (9.6, 0.95) {$A$};
+
+        \node[anchor=south, text width=3cm] at (5.0, 1.25) {
+            $m_0 \colon \operatorname{LSB}(m_0) = 0,$\\
+            $m_1 \colon \operatorname{LSB}(m_1) = 1$
+        };
+        \draw [<-] (3.0, 1.15) -- (7.8, 1.15);
+        \draw [->] (2.2, 0.85) -- (7.0, 0.85);
+        \draw [->, dashed] (7.0, 0.85) -- (8.6, 0.85);
+        \node[anchor=north] at (5.0, 0.75) {$c \leftarrow E(k, m_b)$};
+    \end{tikzpicture}
+    \caption{an example of an adversary with a large semantic security advantage}
+    \label{fig:example_ss_advantage}
+\end{figure}
+
+If adversary $A$ simply outputs the least significant bit of the message $m_b$, then that will mean
+that the output $b^\prime$ will always equal $b$ (since $\operatorname{LSB}(m_b) = b$). This means
+that the advantage
+\begin{equation*}
+\begin{aligned}
+    \operatorname{Adv}_{SS}[B, \mathbb{E}] &= \abs{\operatorname{Pr}[\operatorname{EXP}(0) = 1] -
+    \operatorname{Pr}[\operatorname{EXP}(1) = 1]}\\
+    &= \abs{0 - 1}\\
+    &= 1
+\end{aligned}
+\end{equation*}
+which means that the adversary completely broke the semantic security of the cipher. This means
+that $\mathbb{E}$ is \textit{not} semantically secure.
+
+Clearly this would also hold if any one bit of the message was deductible, or indeed any `bit' of
+information about the message. Hence if a cipher is semantically secure, then no `bit' of
+information is revealed to an adversary.
+
+This is really just perfect security applied to efficient, rather than all, adversaries.
+
+\subsubsection*{Showing the one-time pad is semantically secure}
+
+Clearly the OTP is semantically secure, since we already know it to be perfectly secure. But to
+show this we could consider an experiment as follows:
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \draw (0, 0) rectangle (10, 2);
+
+        % Input arrow
+        \draw[->] (1.2, 2.5) -- (1.2, 1.8);
+        \node[anchor=west] at (1.3, 2.3) {$b \in \{0, 1\}$};
+
+        % Left box
+        \draw (0.2, 0.2) rectangle (2.2, 1.8);
+        \node at (1.2, 1.25) {Challenger};
+        \node at (1.2, 0.75) {$k \leftarrow \mathcal{K}$};
+
+        % Output arrow
+        \draw[->] (8.8, 0.2) -- (8.8, -0.5);
+        \node[anchor=west] at (8.9, -0.3) {$b^\prime \in \{0, 1\}$};
+
+        % Right box
+        \draw (7.8, 0.2) rectangle (9.8, 1.8);
+        \node at (8.8, 1.25) {Adversary};
+        \node at (8.8, 0.75) {$A$};
+
+        \node[anchor=south] at (5.0, 1.25) {$m_0, m_1 \in \mathcal{M} \colon \abs{m_0} =
+                                             \abs{m_1}$};
+        \draw [<-] (3.0, 1.15) -- (7.8, 1.15);
+        \draw [->] (2.2, 0.85) -- (7.0, 0.85);
+        \node[anchor=north] at (5.0, 0.75) {$c \leftarrow k \oplus m_0 \text{ or } c \leftarrow k
+                                             \oplus m_1$};
     \end{tikzpicture}
 \end{figure}
 
+Since $k \oplus m_0$ is distributed \textit{exactly} the same as $k \oplus m_1$ we can say
+\begin{equation*}
+\begin{aligned}
+    \forall A \colon \operatorname{Adv}_SS[A, \mathbb{E}] &=
+        \abs{\operatorname{Pr}[A(k \oplus m_0) = 1] - \operatorname{Pr}[A(k \oplus m_1) = 1]}\\
+    &= 0
+\end{aligned}
+\end{equation*}
+and hence the OTP is semantically secure. In fact, it is secure for all adversaries, not just
+efficient ones.
+
 \subsection{Stream ciphers are semantically secure}
+
+Now we can show that a stream cipher with a secure PRG is semantically secure.
+
+\begin{theorem}
+    $$ G \colon \mathcal{K} \to \{0, 1\}^n \text{ is a secure PRG} $$
+    implies that a stream cipher $\mathbb{E}$ derive from $G$ is semantically secure.
+    \label{theorem:stream_ciphers_are_semantically_secure}
+\end{theorem}
+
+There is no hope of proving this theorem for perfect secrecy, since we know a stream cipher cannot
+be perfectly secure (since it has keys shorter than the message).
+
+To prove Theorem~\ref{theorem:stream_ciphers_are_semantically_secure} we will show the following
+lemma:
+
+\begin{lemma}
+    $\forall $ semantic security adversaries $A$, $\exists$ a PRG adversary $B$ such that
+    $$ \operatorname{Adv}_{SS}[A, \mathbb{E}] \leq 2 \cdot \operatorname{Adv}_{\text{PRG}}[B, G] $$
+    \label{lemma:adv_a_less_adv_b}
+\end{lemma}
+
+If this holds it would imply that the left hand side is negligible, since $B$ is an efficient
+adversary and $G$ is a secure generator (meaning the right hand side is negligible).
+
+So given any adversary $A$, we will build an adversary $B$ which we know has negligible advantage
+over $G$, and show that the advantage of $A$ over $\mathbb{E}$ is also negligible.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \draw (0, 0) rectangle (10, 2);
+
+        % Input arrow
+        \draw[->] (1.2, 2.5) -- (1.2, 1.8);
+        \node[anchor=west] at (1.3, 2.3) {$b \in \{0, 1\}$};
+
+        % Left box
+        \draw (0.2, 0.2) rectangle (2.2, 1.8);
+        \node at (1.2, 1.5) {Challenger};
+        \node at (1.2, 1.0) {$k \leftarrow \mathcal{K}$};
+        \node at (1.2, 0.5) {$r \leftarrow \{0, 0\}^n$};
+
+        % Output arrow
+        \draw[->] (8.8, 0.2) -- (8.8, -0.5);
+        \node[anchor=west] at (8.9, -0.3) {$b^\prime \in \{0, 1\}$};
+
+        % Right box
+        \draw (7.8, 0.2) rectangle (9.8, 1.8);
+        \node at (8.8, 1.25) {Adversary};
+        \node at (8.8, 0.75) {$A$};
+
+        \node[anchor=south] at (5.0, 1.25) {$m_0, m_1 \in \mathcal{M} \colon \abs{m_0} =
+                                             \abs{m_1}$};
+        \draw [<-] (3.0, 1.15) -- (7.8, 1.15);
+        \draw [->] (2.2, 0.85) -- (7.0, 0.85);
+        \node[anchor=north] at (5.0, 0.75) {$c \leftarrow m_b \oplus (G(k) \text{ or } r)$};
+    \end{tikzpicture}
+    \caption{experiment on a stream cipher}
+    \label{fig:stream_cipher_experiment}
+\end{figure}
+
+Figure~\ref{fig:stream_cipher_experiment} shows two different situations; the first where the
+ciphertext is encrypted using the secure generator $G$:
+    $$ \text{For } b = 0, 1 \colon W_b \coloneqq [\text{event that } b^\prime = 1] $$
+and the second using a truly random pad $r$:
+    $$ \text{For } b = 0, 1 \colon R_b \coloneqq [\text{event that } b^\prime = 1] $$
+
+Remember that
+    $$ \operatorname{Adv_{SS}}[A, \mathbb{E}] = \abs{\operatorname{Pr}[W_0] -
+       \operatorname{Pr}[W_1]} $$ 
+
+\paragraph{Proof of Lemma~\ref{lemma:adv_a_less_adv_b}} Let $A$ be a semantic security adversary.
+When we switch from the generator $G$ to the one-time pad, the adversary can't tell, because $G$ is
+computationally indistinguishable from randomness. This already informally proves the semantic
+security of $\mathbb{E}$, but we can be more formal.
+
+\begin{itemize}
+    \item Claim 1: $\abs{\operatorname{Pr}[R_0] - \operatorname{Pr}[R_1]} =
+        \operatorname{Adv}_{SS}(A, \text{OTP}) = 0$
+    \begin{itemize}
+        \item This is obvious, since we already know the OTP has perfect secrecy
+        \item It also means that $\operatorname{Pr}[R_1] = \operatorname{Pr}[R_2]$
+    \end{itemize}
+    \item Claim 2: $\exists B \colon \abs{\operatorname{Pr}[W_b] - \operatorname{Pr}[R_b]} =
+        \operatorname{Adv}_{\text{PRG}}(B, G)$ for $b = 0, 1$
+    \begin{itemize}
+        \item The implication of this being true is shown in
+            Figure~\ref{fig:prg_adv_vs_ss_adv_number_line}: Lemma~\ref{lemma:adv_a_less_adv_b}
+            holds and so proves Theorem~\ref{theorem:stream_ciphers_are_semantically_secure}
+    \end{itemize}
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \draw (0, 0) -- (8, 0);
+
+        \draw (0.2, -0.1) -- (0.2, 0.1);
+        \node at (0.2, -0.4) {0};
+
+        \draw (2, -0.1) -- (2, 0.1);
+        \node at (2, -0.4) {$\operatorname{Pr}[W_0]$};
+
+        \draw (4, -0.1) -- (4, 0.1);
+        \node at (4, -0.4) {$\operatorname{Pr}[R_b]$};
+
+        \draw (6, -0.1) -- (6, 0.1);
+        \node at (6, -0.4) {$\operatorname{Pr}[W_1]$};
+
+        \draw (7.8, -0.1) -- (7.8, 0.1);
+        \node at (7.8, -0.4) {1};
+
+        \node at (4, 0.8) {$\operatorname{Adv}_{SS}[A, \mathbb{E}]$};
+        \draw [decorate,decoration={brace,amplitude=5pt,raise=4pt},yshift=0pt]
+            (2, 0.2) -- (6, 0.2);
+
+        \node at (2.5, -1.2) {$\operatorname{Adv}_{\text{PRG}}[B, G]$};
+        \draw [decorate,decoration={brace,amplitude=5pt,mirror,raise=4pt},yshift=0pt]
+            (2, -0.6) -- (3.9, -0.6);
+
+        \node at (5.5, -1.2) {$\operatorname{Adv}_{\text{PRG}}[B, G]$};
+        \draw [decorate,decoration={brace,amplitude=5pt,mirror,raise=4pt},yshift=0pt]
+            (4.1, -0.6) -- (6, -0.6);
+    \end{tikzpicture}
+    \caption{relation between PRG advantage and SS advantage}
+    \label{fig:prg_adv_vs_ss_adv_number_line}
+\end{figure}
+
+If the second claim holds, Figure~\ref{fig:prg_adv_vs_ss_adv_number_line} shows that the distance
+between $\operatorname{Pr}[W_0]$ and $\operatorname{Pr}[W_1]$ is at most twice the advantage of $B$
+against $G$.
+
+\paragraph{Proof of claim 2} We can construct an appropriate statistical test $B$ by considering
+one that uses adversary $A$ inside of it as shown in Figure~\ref{fig:claim_2_proof}.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \draw (0, 0) rectangle (8, 3);
+
+        % Larger right box
+        \draw (2.8, 0.2) rectangle (7.8, 2.8);
+        \node at (6.3, 2.4) {PRG adversary $B$};
+
+        % Smaller right box
+        \draw (5.6, 0.4) rectangle (7.6, 2.0);
+        \node at (6.6, 1.45) {Adversary};
+        \node at (6.6, 0.95) {$A$};
+
+        \node[anchor=south] at (1.8, 2) {$y \in \{0, 1\}^n$};
+        \draw[->] (0.8, 2) -- (2.8, 2);
+
+        \node[anchor=south] at (1.8, 0.65) {$b^\prime \in \{0, 1\}$};
+        \draw[<-] (0.8, 0.65) -- (5.6, 0.65);
+
+        \node[anchor=south] at (4.6, 1.5) {$m_0, m_1$};
+        \draw[<-] (3.6, 1.5) -- (5.6, 1.5);
+
+        \node[anchor=south] at (4.6, 0.9) {$c \leftarrow m_0 \oplus y$};
+        \draw[->] (3.6, 0.9) -- (5.6, 0.9);
+
+    \end{tikzpicture}
+    \caption{another algorithm}
+    \label{fig:claim_2_proof}
+\end{figure}
+
+We can now look at the advantage of $B$ over $G$ as follows:
+\begin{equation*}
+\begin{aligned}
+    \operatorname{Adv}_{\text{PRG}}[B, G]
+        &= \abs{\operatorname{Pr}_{r \leftarrow \{0, 1\}^n}[B(r) = 1] -
+                \operatorname{Pr}_{k \leftarrow \mathcal{K}}[B(G(k)) = 1]}\\
+        &= \abs{\operatorname{Pr}[R_0] - \operatorname{Pr}[W_0]}
+\end{aligned}
+\end{equation*}
+
+And so we have, given an adversary $A$, constructed a test $B$ such that claim 2 holds. This
+proves Lemma~\ref{lemma:adv_a_less_adv_b}, which means that the advantage of $A$ over $\mathbb{E}$
+for any $A$ is negligible, proving Theorem~\ref{theorem:stream_ciphers_are_semantically_secure}.
 
 \chapter{Block ciphers}
 
