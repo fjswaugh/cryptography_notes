@@ -1,6 +1,6 @@
 # cryptography_notes
 
-Notes for Stanford's Coursera cryptography courses. The latest pdf is available under 'releases'
+Notes for Stanford's Coursera cryptography courses. The latest pdf is available [here](https://github.com/fjswaugh/cryptography_notes/releases)
 
 ## Version numbers
 
