@@ -1502,7 +1502,67 @@ input the keys $k_i$ and the current state of the message as output by the previ
 \end{figure}
 
 The message $m$ is always of a fixed length (the length of the block, e.g. 128 bits for AES). 3DES
-uses 48 rounds ($n = 48$), whereas AES uses 10.
+uses 48 rounds ($n = 48$), whereas AES uses 10. The performance of various ciphers is compared in
+Table~\ref{table:performance_stream_vs_block}.
+
+\begin{table}
+    \centering
+    \begin{tabular}{ c | c | c }
+        PRG & Block/key size & Speed (MB/sec) \\
+        \hline
+        RC4 & & 126 \\
+        Salsa20/12 & & 643 \\
+        Sosemanuk & & 727 \\
+        \hline
+        3DES & 64/128 & 13 \\
+        AES & 128/128 & 109
+    \end{tabular}
+    \caption{performance comparison of stream and block ciphers}
+    \label{table:performance_stream_vs_block}
+\end{table}
+
+\subsection{Abstraction: PRPs and PRFs}
+
+\begin{definition}[Pseudo random function]
+    A PRF defined over $(K, X, Y)$ is a function
+        $$ F\colon K \times X \to Y $$
+    such that there exists an ``efficient" algorithm to evaluate $F(k, x)$.
+\end{definition}
+
+\begin{definition}[Pseudo random permutation]
+    A PRP defined over $(K, X)$ is a function
+        $$ E\colon K \times X \to X $$
+    such that:
+    \begin{enumerate}
+        \item Exists ``efficient" deterministic algorithm to evaluate $E(k, x)$
+        \item The function $E(k, \cdot)$ is one-to-one
+        \item Exists ``efficient" inversion algorithm $D(k, y)$
+    \end{enumerate}
+\end{definition}
+
+A pseudo random permutation captures the idea of a block cipher well. So both 3DES and AES are
+examples of PRPs:
+
+\begin{itemize}
+    \item AES: $K \times X \to X$ where $K = X = \{0, 1\}^{128}$
+    \item 3DES: $K \times X \to X$ where $X = \{0, 1\}^{64}$, $K = \{0, 1\}^{168}$
+\end{itemize}
+
+Functionally, any PRP is also a PRF. A PRP is a PRF where $X = Y$ and is efficiently invertible.
+
+\subsubsection{Secure PRFs}
+
+Let $F\colon K \times X \to Y$ be a PRF. Consider
+
+\begin{itemize}
+    \item $\operatorname{Funs}[X, Y]$: the set of \textit{all} functions from $X$ to $Y$
+    \item $S_F = \{F(k, \cdot) \text{ such that } k \in K\} \subseteq \operatorname{Funs}[X, Y]$
+\end{itemize}
+
+By intuition, a PRF is secure if a random function in $\operatorname{Funs}[X, Y]$ (size
+$\abs{Y}^{\abs{X}}$) is indistinguishable from a random function in $S_F$ (size $\abs{K}$).
+
+
 
 \section{Block ciphers 2: the Data Encryption Standard}
 \section{Block ciphers 3: AES and other constructions}
